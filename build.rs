@@ -85,6 +85,7 @@ fn main() {
     }
 
     let public_types_bindings = public_types_bindings
+        .clang_arg("-std=c++17")
         .generate()
         .expect("Unable to generate public types bindings");
 
