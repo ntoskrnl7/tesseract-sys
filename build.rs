@@ -30,8 +30,16 @@ fn find_tesseract_system_lib() -> Vec<String> {
         println!("cargo:rustc-link-lib={}", lib);
     }
 
+    // C++
     #[cfg(all(target_os = "macos", feature = "enable-static"))]
     println!("cargo:rustc-link-lib=c++");
+
+    #[cfg(all(target_os = "linux", feature = "enable-static"))]
+    println!("cargo:rustc-link-lib=stdc++");
+
+    // openmp (for GOMP_*, omp_*)
+    #[cfg(all(target_os = "linux", feature = "enable-static"))]
+    println!("cargo:rustc-link-lib=gomp");
 
     // for vDSP_dotpr/vDSP_dotprD
     #[cfg(all(target_os = "macos", feature = "enable-static"))]
