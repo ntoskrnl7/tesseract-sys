@@ -1,6 +1,6 @@
 extern crate bindgen;
 
-#[cfg(target_os = "macos")]
+#[cfg(not(windows))]
 use pkg_config;
 use std::env;
 use std::path::PathBuf;
@@ -16,13 +16,25 @@ fn find_tesseract_system_lib() -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
-// On macOS, we sometimes need additional search paths, which we get using pkg-config
-#[cfg(target_os = "macos")]
+#[cfg(not(windows))]
 fn find_tesseract_system_lib() -> Vec<String> {
-    let pk = pkg_config::Config::new().probe("tesseract").unwrap();
+    let pk = pkg_config::Config::new()
+        .statik(cfg!(feature="enable-static"))
+        .probe("tesseract").unwrap();
     // Tell cargo to tell rustc to link the system proj shared library.
-    println!("cargo:rustc-link-search=native={:?}", pk.link_paths[0]);
-    println!("cargo:rustc-link-lib=tesseract");
+    for path in pk.link_paths {
+        println!("cargo:rustc-link-search=native={:?}", path);
+    }
+    for lib in pk.libs {
+        println!("cargo:rustc-link-lib={}", lib);
+    }
+
+    #[cfg(all(target_os="macos", feature="enable-static"))]
+    println!("cargo:rustc-link-lib=c++");
+
+    // for vDSP_dotpr/vDSP_dotprD
+    #[cfg(all(target_os="macos", feature="enable-static"))]
+    println!("cargo:rustc-link-lib=framework=Accelerate");
 
     let mut include_paths = pk.include_paths.clone();
     include_paths
@@ -36,12 +48,6 @@ fn find_tesseract_system_lib() -> Vec<String> {
         .map(|x| x.to_string_lossy())
         .map(|x| x.to_string())
         .collect::<Vec<String>>()
-}
-
-#[cfg(all(not(windows), not(target_os = "macos")))]
-fn find_tesseract_system_lib() -> Vec<String> {
-    println!("cargo:rustc-link-lib=tesseract");
-    vec![]
 }
 
 fn main() {

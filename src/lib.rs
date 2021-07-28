@@ -35,11 +35,4 @@ mod tests {
             TessBaseAPIDelete(cube);
         }
     }
-
-    #[test]
-    #[allow(path_statements)]
-    fn defined_constants() {
-        kMinCredibleResolution;
-        kMaxCredibleResolution;
-    }
 }
