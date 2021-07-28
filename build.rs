@@ -19,8 +19,9 @@ fn find_tesseract_system_lib() -> Vec<String> {
 #[cfg(not(windows))]
 fn find_tesseract_system_lib() -> Vec<String> {
     let pk = pkg_config::Config::new()
-        .statik(cfg!(feature="enable-static"))
-        .probe("tesseract").unwrap();
+        .statik(cfg!(feature = "enable-static"))
+        .probe("tesseract")
+        .unwrap();
     // Tell cargo to tell rustc to link the system proj shared library.
     for path in pk.link_paths {
         println!("cargo:rustc-link-search=native={:?}", path);
@@ -29,11 +30,11 @@ fn find_tesseract_system_lib() -> Vec<String> {
         println!("cargo:rustc-link-lib={}", lib);
     }
 
-    #[cfg(all(target_os="macos", feature="enable-static"))]
+    #[cfg(all(target_os = "macos", feature = "enable-static"))]
     println!("cargo:rustc-link-lib=c++");
 
     // for vDSP_dotpr/vDSP_dotprD
-    #[cfg(all(target_os="macos", feature="enable-static"))]
+    #[cfg(all(target_os = "macos", feature = "enable-static"))]
     println!("cargo:rustc-link-lib=framework=Accelerate");
 
     let mut include_paths = pk.include_paths.clone();
